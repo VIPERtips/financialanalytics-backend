@@ -1,0 +1,5 @@
+package com.tadiwa.financialanalytics.model;
+
+public enum Category {
+	WIFI_PAYMENT,CASH, BANK, PROPERTY, TRAVEL, UTILITIES,FOOD,TRANSPORT,HEALTHCARE,HOUSING,EDUCATION,ENTERTAINMENT,
+}
