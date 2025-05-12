@@ -43,7 +43,7 @@ public class SecurityConfig {
                             "http://localhost:3000",
                             "http://192.168.49.243:8080",
                            "http://10.0.2.2:8080",
-                           "http://localhost:8080"
+                           "http://localhost:8080","https://fin-pulse-tracker.vercel.app"
                     ));
                     corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
                     corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
@@ -53,7 +53,7 @@ public class SecurityConfig {
                     return corsConfig;
                 }))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**","/static/**","/index.html").permitAll()
+                        .requestMatchers("/api/auth/**","/static/**","/index.html","/health").permitAll()
                         .requestMatchers( "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
