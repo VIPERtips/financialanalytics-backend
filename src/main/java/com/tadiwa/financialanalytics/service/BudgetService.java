@@ -72,11 +72,12 @@ public class BudgetService {
 		budgetRepository.delete(budget);
 	}
 	
-	public void updateSpentAmount(int budgetID,Double amount) {
+	public void updateBudget(int budgetID,Double amount,Category category) {
 		Budget budget = getBudgetById(budgetID);
 		double newlimit = amount;
 		budget.setbudgetLimit(newlimit);
 		budget.setSpent(budget.getSpent());
+		budget.setCategory(category);
 		budgetRepository.save(budget);
 	}
 	

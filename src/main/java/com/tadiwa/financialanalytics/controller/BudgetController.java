@@ -1,5 +1,7 @@
 package com.tadiwa.financialanalytics.controller;
 
+import java.util.Locale.Category;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -85,10 +87,10 @@ public class BudgetController {
 	
 	@PutMapping("/{id}")
 	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-	public ResponseEntity<ApiResponse<Budget>> updateSpent(@PathVariable int id,@RequestParam double amount){
+	public ResponseEntity<ApiResponse<Budget>> updateSpent(@PathVariable int id,@RequestParam double amount, @RequestParam com.tadiwa.financialanalytics.model.Category category){
 		try {
-			budgetService.updateSpentAmount(id, amount);
-			return ResponseEntity.ok(new ApiResponse<>("Spent successfully updated", true, null));
+			budgetService.updateBudget(id, amount,category);
+			return ResponseEntity.ok(new ApiResponse<>("Budget successfully updated", true, null));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(new ApiResponse<>(e.getMessage(), false, null));
