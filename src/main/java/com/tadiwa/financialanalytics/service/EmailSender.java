@@ -7,6 +7,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
 @Service
@@ -16,7 +17,7 @@ public class EmailSender {
     private JavaMailSender javaMailSender;
     
     private static final String SUPPORT_EMAIL = "noreply@finpulse.com";
-    private static final String SUPPORT_LINK = "http://localhost:8080";
+    private static final String SUPPORT_LINK = "https://fin-pulse-tracker.vercel.app";
 
     public void sendEmail(String toEmail, String subject, String body) {
         
@@ -27,7 +28,7 @@ public class EmailSender {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-            helper.setFrom(SUPPORT_EMAIL);
+            helper.setFrom(new InternetAddress(SUPPORT_EMAIL,"FinPulse"));
             helper.setTo(userEmail);
             helper.setSubject("FinPulse - Password Reset Request");
 

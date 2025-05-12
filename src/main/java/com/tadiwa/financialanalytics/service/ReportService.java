@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.tadiwa.financialanalytics.model.Transaction;
 import com.tadiwa.financialanalytics.model.Type;
+import com.tadiwa.financialanalytics.model.User;
 import com.tadiwa.financialanalytics.repository.TransactionRepository;
 
 @Service
@@ -21,8 +22,8 @@ public class ReportService {
 	@Autowired
 	private TransactionRepository transactionRepository;
 
-	public Map<String, Object> generateProfitAndLossReport(LocalDate from, LocalDate to) {
-		List<Transaction> transactions = transactionRepository.findByDateBetween(from, to);
+	public Map<String, Object> generateProfitAndLossReport(LocalDate from, LocalDate to, User user) {
+		List<Transaction> transactions = transactionRepository.findByUser_UserIdAndDateBetween(user.getUserId() , from, to);
 		double totalIncome = 0.0;
 		double totalExpense = 0.0;
 		for (Transaction t : transactions) {
@@ -65,8 +66,8 @@ public class ReportService {
 		return response;
 	}
 
-	public Map<String, Object> generateValidatedProfitAndLossReport(LocalDate from, LocalDate to, double salary) {
-		Map<String, Object> pnlReport = generateProfitAndLossReport(from, to);
+	public Map<String, Object> generateValidatedProfitAndLossReport(LocalDate from, LocalDate to, double salary, User user) {
+		Map<String, Object> pnlReport = generateProfitAndLossReport(from, to, user);
 		@SuppressWarnings("unchecked")
 		Map<String, Double> summary = (Map<String, Double>) pnlReport.get("summary");
 		double totalIncome = summary.get("totalIncome");
@@ -79,20 +80,16 @@ public class ReportService {
 		return pnlReport;
 	}
 
-	public Map<String, Object> generateBalanceSheetReport(LocalDate from, LocalDate to) {
-		List<Transaction> transactions = transactionRepository.findByDateBetween(from, to);
-
+	public Map<String, Object> generateBalanceSheetReport(LocalDate from, LocalDate to, User user) {
+		List<Transaction> transactions = transactionRepository.findByUser_UserIdAndDateBetween(user.getUserId(), from, to);
 		List<Map<String, Object>> assetsList = new ArrayList<>();
 		List<Map<String, Object>> liabilitiesList = new ArrayList<>();
-
 		double totalAssets = 0.0;
 		double totalLiabilities = 0.0;
-
 		for (Transaction t : transactions) {
 			Map<String, Object> item = new HashMap<>();
-			item.put("name", t.getDescription()); // assuming transaction has a description field
+			item.put("name", t.getDescription());
 			item.put("value", t.getAmount());
-
 			if (t.getType() == Type.INCOME) {
 				assetsList.add(item);
 				totalAssets += t.getAmount();
@@ -101,68 +98,49 @@ public class ReportService {
 				totalLiabilities += t.getAmount();
 			}
 		}
-
 		double netWorth = totalAssets - totalLiabilities;
-
 		Map<String, Object> summary = new HashMap<>();
 		summary.put("totalAssets", totalAssets);
 		summary.put("totalLiabilities", totalLiabilities);
 		summary.put("netWorth", netWorth);
-
 		Map<String, Object> response = new HashMap<>();
 		response.put("assets", assetsList);
 		response.put("liabilities", liabilitiesList);
 		response.put("summary", summary);
-
 		return response;
 	}
 
-	public Map<String, Object> generateTrendsReport(LocalDate from, LocalDate to) {
-		List<Transaction> transactions = transactionRepository.findByDateBetween(from, to);
-
-		// Group by month
+	public Map<String, Object> generateTrendsReport(LocalDate from, LocalDate to, User user) {
+		List<Transaction> transactions = transactionRepository.findByUser_UserIdAndDateBetween(user.getUserId(), from, to);
 		Map<YearMonth, List<Transaction>> grouped = transactions.stream()
 				.collect(Collectors.groupingBy(t -> YearMonth.from(t.getDate())));
-
 		List<Map<String, Object>> trends = new ArrayList<>();
-
-		// Iterate through months between from & to
 		YearMonth start = YearMonth.from(from);
 		YearMonth end = YearMonth.from(to);
-
 		while (!start.isAfter(end)) {
 			List<Transaction> monthlyTxns = grouped.getOrDefault(start, Collections.emptyList());
-
 			double income = monthlyTxns.stream().filter(t -> t.getType() == Type.INCOME)
 					.mapToDouble(Transaction::getAmount).sum();
-
 			double expenses = monthlyTxns.stream().filter(t -> t.getType() == Type.EXPENSE)
 					.mapToDouble(Transaction::getAmount).sum();
-
 			double savings = income - expenses;
-
 			Map<String, Object> monthData = new HashMap<>();
 			monthData.put("date", start.atEndOfMonth().toString());
 			monthData.put("income", income);
 			monthData.put("expenses", expenses);
 			monthData.put("savings", savings);
-
 			trends.add(monthData);
 			start = start.plusMonths(1);
 		}
-
 		Map<String, Object> response = new HashMap<>();
 		response.put("trends", trends);
 		return response;
 	}
 
-	public Map<String, Object> generateSummaryReport(LocalDate from, LocalDate to) {
-		List<Transaction> transactions = transactionRepository.findByDateBetween(from, to);
-
+	public Map<String, Object> generateSummaryReport(LocalDate from, LocalDate to, User user) {
+		List<Transaction> transactions = transactionRepository.findByUser_UserIdAndDateBetween(user.getUserId(), from, to);
 		double totalIncome = 0.0;
 		double totalExpense = 0.0;
-
-		// Calculate summary for the period
 		for (Transaction t : transactions) {
 			if (t.getType() == Type.INCOME) {
 				totalIncome += t.getAmount();
@@ -170,16 +148,11 @@ public class ReportService {
 				totalExpense += t.getAmount();
 			}
 		}
-
 		double netProfit = totalIncome - totalExpense;
-
-		// Return summary data
 		Map<String, Object> summary = new HashMap<>();
 		summary.put("totalIncome", totalIncome);
 		summary.put("totalExpense", totalExpense);
 		summary.put("netProfit", netProfit);
-
 		return summary;
 	}
-
 }

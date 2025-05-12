@@ -25,6 +25,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
 
 	void deleteAllByUser(User user);
 
+	List<Transaction> findByUser_UserIdAndDateBetween(int userId, LocalDate from, LocalDate to);
+
 	
 
 }
