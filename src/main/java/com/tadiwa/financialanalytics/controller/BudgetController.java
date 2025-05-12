@@ -87,9 +87,9 @@ public class BudgetController {
 	
 	@PutMapping("/{id}")
 	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-	public ResponseEntity<ApiResponse<Budget>> updateSpent(@PathVariable int id,@RequestParam double amount, @RequestParam com.tadiwa.financialanalytics.model.Category category){
+	public ResponseEntity<ApiResponse<Budget>> updateSpent(@PathVariable int id,@RequestParam double amount, @RequestParam com.tadiwa.financialanalytics.model.Period period){
 		try {
-			budgetService.updateBudget(id, amount,category);
+			budgetService.updateBudget(id, amount,period);
 			return ResponseEntity.ok(new ApiResponse<>("Budget successfully updated", true, null));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.tadiwa.financialanalytics.model.Budget;
 import com.tadiwa.financialanalytics.model.Category;
+import com.tadiwa.financialanalytics.model.Period;
 import com.tadiwa.financialanalytics.model.Transaction;
 import com.tadiwa.financialanalytics.model.Type;
 import com.tadiwa.financialanalytics.model.User;
@@ -72,12 +73,12 @@ public class BudgetService {
 		budgetRepository.delete(budget);
 	}
 	
-	public void updateBudget(int budgetID,Double amount,Category category) {
+	public void updateBudget(int budgetID,Double amount,Period period) {
 		Budget budget = getBudgetById(budgetID);
 		double newlimit = amount;
 		budget.setbudgetLimit(newlimit);
 		budget.setSpent(budget.getSpent());
-		budget.setCategory(category);
+		budget.setPeriod(period);
 		budgetRepository.save(budget);
 	}
 	
