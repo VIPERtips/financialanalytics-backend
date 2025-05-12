@@ -37,21 +37,32 @@ public class TransactionService {
 	@Autowired
 	private UserService userService;
 	
+	@Autowired
+	private BudgetService budgetService;
+	
 	
 	public Transaction createTransaction(Transaction transaction, int id) {
-		if (!categoryExists(transaction.getCategory().toString())) {
-	        throw new RuntimeException("Invalid category: " + transaction.getCategory() + 
+	    if (!categoryExists(transaction.getCategory().toString())) {
+	        throw new RuntimeException("Invalid category: " + transaction.getCategory() +
 	            ". Allowed values: " + Arrays.toString(Category.values()));
 	    }
 	    if (!typeExists(transaction.getType().toString())) {
-	        throw new RuntimeException("Invalid type: " + transaction.getType() + 
+	        throw new RuntimeException("Invalid type: " + transaction.getType() +
 	            ". Allowed values: " + Arrays.toString(Type.values()));
 	    }
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("User with ID " + id + " not found."));
-		transaction.setUser(user);
-		return transactionRepository.save(transaction);
+
+	    User user = userRepository.findById(id)
+	            .orElseThrow(() -> new RuntimeException("User with ID " + id + " not found."));
+	    transaction.setUser(user);
+
+	    Transaction savedTransaction = transactionRepository.save(transaction);
+
+	    
+	    budgetService.updateBudgetSpentOnTransaction(user, transaction);
+
+	    return savedTransaction;
 	}
+
 	
 	public Transaction updateTransaction(Transaction req, int id) {
 		Transaction existingTransaction = transactionRepository.findById(id)

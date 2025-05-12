@@ -29,28 +29,28 @@ public class BudgetService {
 	
 
 	public Budget createOrUpdateBudget(int id, Budget budget) {
-		System.out.println("trying to save the budget"+budget+ "budget is"+budget.getCategory());
-		/*if (!categoryExists(budget.getCategory().toString())) {
-	        throw new RuntimeException("Invalid category: " + budget.getCategory() + 
-	            ". Allowed values: " + Arrays.toString(Category.values()));
+	    System.out.println("trying to save the budget " + budget + " budget is " + budget.getCategory());
+
+	    if (budget.getCategory() == null) {
+	        throw new RuntimeException("Category not mentioned");
 	    }
-		
-		if (!periodExists(budget.getPeriod().toString())) {
-	        throw new RuntimeException("Invalid period: " + budget.getPeriod() + 
-	            ". Allowed values: " + Arrays.toString(Type.values()));
-	    }*/
-		if(budget.getCategory() == null) {
-			System.out.println("ctegory is null");
-			throw new RuntimeException("Category not mentioned");
-		}
-		User user = userRepository.findById(id).orElseThrow(()-> 
-		new RuntimeException("User not found with ID: "+ id));
-		budget.setbudgetLimit(budget.getbudgetLimit());
-		budget.setCategory(budget.getCategory());
-		budget.setPeriod(budget.getPeriod());
-		budget.setUser(user);
-		return budgetRepository.save(budget);
+
+	    User user = userRepository.findById(id)
+	            .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+
+	    Budget existingBudget = budgetRepository.findByUserAndCategory(user, budget.getCategory());
+
+	    if (existingBudget != null) {
+	        // Only block if it's not the same budget being updated
+	        if (budget.getId() == 0 || existingBudget.getId() != budget.getId()) {
+	            throw new RuntimeException("Fam... You already have a budget for category: " + budget.getCategory());
+	        }
+	    }
+
+	    budget.setUser(user);
+	    return budgetRepository.save(budget);
 	}
+
 	
 	public Budget getBudgetById(int budgetID) {
 		return budgetRepository.findById(budgetID)
@@ -74,8 +74,9 @@ public class BudgetService {
 	
 	public void updateSpentAmount(int budgetID,Double amount) {
 		Budget budget = getBudgetById(budgetID);
-		double newSpent = budget.getSpent()+amount;
-		budget.setSpent(newSpent);
+		double newlimit = amount;
+		budget.setbudgetLimit(newlimit);
+		budget.setSpent(budget.getSpent());
 		budgetRepository.save(budget);
 	}
 	
@@ -87,6 +88,20 @@ public class BudgetService {
 	    }
 	    return false;
 	}
+	
+	@Transactional
+	public void updateBudgetSpentOnTransaction(User user, Transaction transaction) {
+	    Budget budget = budgetRepository.findByUserAndCategory(user, transaction.getCategory());
+
+	    if (budget != null) {
+	        double newSpent = budget.getSpent() + transaction.getAmount();
+	        budget.setSpent(newSpent);
+	        budgetRepository.save(budget);
+	    } else {
+	        System.out.println("No budget found for category: " + transaction.getCategory());
+	    }
+	}
+
 
 	public boolean periodExists(String type) {
 	    for (Type t : Type.values()) {

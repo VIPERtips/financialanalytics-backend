@@ -3,6 +3,7 @@ package com.tadiwa.financialanalytics.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -19,7 +20,8 @@ public class Budget {
 	
 	@Enumerated(EnumType.STRING)
 	@JsonProperty("category")
-	private BudgetCategory category;
+	@Column(unique = true)
+	private Category category;
 	@JsonProperty("budgetLimit")
 	private double budgetLimit;
 	@JsonProperty("spent")
@@ -35,10 +37,10 @@ public class Budget {
 	public Budget() {
 		// TODO Auto-generated constructor stub
 	}
-	public BudgetCategory getCategory() {
+	public Category getCategory() {
 		return category;
 	}
-	public void setCategory(BudgetCategory category) {
+	public void setCategory(Category category) {
 		this.category = category;
 	}
 	public double getbudgetLimit() {
@@ -71,7 +73,7 @@ public class Budget {
 	public void setId(int id) {
 		this.id = id;
 	}
-	public Budget(BudgetCategory category, double budgetLimit, double spent, Period period, User user) {
+	public Budget(Category category, double budgetLimit, double spent, Period period, User user) {
 		this.category = category;
 		this.budgetLimit = budgetLimit;
 		this.spent = spent;
